@@ -61,7 +61,7 @@ public class UserDaoImplIT {
 
         Optional<User> fetched = userDao.findById(created.getId());
         assertTrue(fetched.isPresent());
-        assertEquals("Alice", fetched.get().getName());
+        assertEquals("Alice", fetched.get().getUsername());
     }
 
     @Test
@@ -83,9 +83,9 @@ public class UserDaoImplIT {
     @Test
     public void testUpdate() throws Exception {
         User u = userDao.create(new User("Old", "old@e.com", 40));
-        u.setName("NewName");
+        u.setUsername("NewName");
         User updated = userDao.update(u);
-        assertEquals("NewName", updated.getName());
+        assertEquals("NewName", updated.getUsername());
     }
 }
 

@@ -3,17 +3,17 @@ package com.example.app;
 
 import com.example.config.HibernateUtil;
 import com.example.model.User;
-import com.example.service.UserService;
+import com.example.service.impl.UserServiceImpl;
 import com.example.util.ConsoleHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-
+//ИСПРАВИТЬ!!!
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-    private static final UserService userService = new UserService();
+    private static final UserServiceImpl USER_SERVICE_IMPL = new UserServiceImpl();
 
     public static void main(String[] args) {
         try {
@@ -55,7 +55,7 @@ public class Main {
             String email = ConsoleHelper.readLine("Email: ");
             String ageStr = ConsoleHelper.readLine("Age (leave empty): ");
             Integer age = ageStr.isEmpty() ? null : Integer.valueOf(ageStr);
-            User u = userService.create(name, email, age);
+            User u = USER_SERVICE_IMPL.create(name, email, age);
             System.out.println("Created: " + u);
         } catch (Exception e) {
             log.error("Error creating user", e);
@@ -65,7 +65,7 @@ public class Main {
 
     private static void listUsers() {
         try {
-            List<User> users = userService.listAll();
+            List<User> users = USER_SERVICE_IMPL.listAll();
             if (users.isEmpty()) System.out.println("No users found.");
             else users.forEach(System.out::println);
         } catch (Exception e) {
@@ -78,7 +78,7 @@ public class Main {
         try {
             Long id = ConsoleHelper.readLong("Id: ");
             if (id == null) { System.out.println("Invalid id"); return; }
-            Optional<User> u = userService.getById(id);
+            Optional<User> u = USER_SERVICE_IMPL.getById(id);
             System.out.println(u.map(Object::toString).orElse("Not found"));
         } catch (Exception e) {
             log.error("Error fetching user", e);
@@ -94,7 +94,7 @@ public class Main {
             String email = ConsoleHelper.readLine("Email (leave empty to keep): ");
             String ageStr = ConsoleHelper.readLine("Age (leave empty to keep): ");
             Integer age = ageStr.isEmpty() ? null : Integer.valueOf(ageStr);
-            User updated = userService.update(id, name.isEmpty() ? null : name, email.isEmpty() ? null : email, age);
+            User updated = USER_SERVICE_IMPL.update(id, name.isEmpty() ? null : name, email.isEmpty() ? null : email, age);
             System.out.println("Updated: " + updated);
         } catch (Exception e) {
             log.error("Error updating user", e);
@@ -106,7 +106,7 @@ public class Main {
         try {
             Long id = ConsoleHelper.readLong("Id: ");
             if (id == null) { System.out.println("Invalid id"); return; }
-            boolean ok = userService.delete(id);
+            boolean ok = USER_SERVICE_IMPL.delete(id);
             System.out.println(ok ? "Deleted" : "Not found");
         } catch (Exception e) {
             log.error("Error deleting user", e);
@@ -114,3 +114,4 @@ public class Main {
         }
     }
 }
+

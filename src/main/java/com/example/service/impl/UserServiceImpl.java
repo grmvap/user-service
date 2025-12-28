@@ -8,6 +8,7 @@ import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -19,6 +20,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final KafkaTemplate<String, UserEvent> kafkaTemplate;
+
+
+    @Value("${kafka.topic.user-events}")
+    private String userEventsTopic;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -80,5 +87,33 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    public User createUser(User user) {
+        User savedUser = userRepository.save(user);
+
+        UserEvent event = new UserEvent();
+        event.setEventType("CREATED");
+        event.setEmail(savedUser.getEmail());
+        event.setUserId(savedUser.getId());
+        event.setUsername(savedUser.getUsername());
+
+        kafkaTemplate.send(userEventsTopic, event);
+
+        return savedUser;
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.findById(id).ifPresent(user -> {
+            userRepository.deleteById(id);
+
+            UserEvent event = new UserEvent();
+            event.setEventType("DELETED");
+            event.setEmail(user.getEmail());
+            event.setUserId(user.getId());
+            event.setUsername(user.getUsername());
+
+            kafkaTemplate.send(userEventsTopic, event);
+        });
     }
 }
